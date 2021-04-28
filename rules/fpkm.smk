@@ -3,29 +3,6 @@ def get_bams(wildcards):
     print(sam)
     return sam
 
-#rule featurecounts:
-#    input:
-#        #sam=get_bams,
-#        sam="star/{sample}-{unit}/{sample}-{unit}_Aligned.sortedByCoord.out.bam",
-#        annotation=config["ref"]["annotation"],
-#        # optional input
-#        # chr_names="",           # implicitly sets the -A flag
-#        fasta=config["ref"]["genomefa"]     # implicitly sets the -G flag
-#    output:
-#        multiext("results/featureCounts/{sample}-{unit}",
-#                 ".featureCounts",
-#                 ".featureCounts.summary",
-#                 ".featureCounts.jcounts")
-#    log:
-#        "logs/featurecount/{sample}-{unit}.log"
-#    params:
-#        tmp_dir="",   # implicitly sets the --tmpDir flag
-#        r_path="",    # implicitly sets the --Rpath flag
-#        extra="{}".format(config["params"]["featurecounts"])
-#    threads: 8
-#    wrapper:
-#        "0.69.0/bio/subread/featurecounts"
-
 rule featurecounts_onefile:
     input:
         sam=expand("mapped/{unit.sample}.{unit.unit}.bam", unit=units.itertuples()),

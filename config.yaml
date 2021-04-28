@@ -17,6 +17,5 @@ ref:
   adapter: "/data/projects/common_references/raw/CustomBlacklist.fa"
 
 params:
-  star: ""
   featurecounts: "-p -C -t exon -g gene_id --extraAttributes gene_symbol,transcript_id,transcript_symbol"
   featurecountsmulti: "-p -M -t exon -g gene_id --extraAttributes gene_symbol,transcript_id,transcript_symbol"
