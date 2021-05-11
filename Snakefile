@@ -7,11 +7,9 @@ min_version("5.1.2")
 ##### load config and sample sheets #####
 
 configfile: "config.yaml"
-validate(config, schema="schemas/config.schema.yaml")
 
 units = pd.read_table(config["units"], dtype=str).set_index(["sample", "unit"], drop=False)
 units.index = units.index.set_levels([i.astype(str) for i in units.index.levels])  # enforce str in index
-validate(units, schema="schemas/units.schema.yaml")
 adapter=config["ref"]["adapter"]
 #print(units)
 
@@ -28,12 +26,11 @@ rule all:
         expand("qc/fastqc_posttrim/{unit.sample}-{unit.unit}_r2.html", unit=units.itertuples()),
         "qc/multiqc_report_pretrim.html",
         "qc/multiqc_report_posttrim.html",
-        #expand("star/{unit.sample}-{unit.unit}/Aligned.sortedByCoord.out.bam", unit=units.itertuples()),
-        #expand("results/{unit.sample}-{unit.unit}.featureCounts", unit=units.itertuples())
         "qc/multiqc_report_all.html",
+        #expand("mapped/{unit.sample}-{unit.unit}.sorted.bam", unit=units.itertuples()),
         "results/featureCounts/all.featureCounts",
-        "results/featureCounts/all_multi.featureCounts",
-        "results/featureCounts/all_multi_frac.featureCounts"
+        #"results/featureCounts/all_multi.featureCounts",
+        #"results/featureCounts/all_multi_frac.featureCounts"
 
 ##### setup report #####
 

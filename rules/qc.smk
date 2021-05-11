@@ -20,6 +20,7 @@ rule rseqc_gtf2bed:
         db=temp("qc/rseqc/annotation.db"),
     log:
         "logs/rseqc_gtf2bed.log",
+    resources: time_min=120, mem_mb=8000, cpus=1
     conda:
         "../envs/gffutils.yaml"
     script:
@@ -47,13 +48,14 @@ rule rseqc_gtf2bed:
 
 rule rseqc_junction_saturation:
     input:
-        bam="mapped/{sample}.{unit}.bam",
+        bam="mapped/{sample}.{unit}.sorted.bam",
         bed="qc/rseqc/annotation.bed",
     output:
         "qc/rseqc/{sample}-{unit}.junctionsat.junctionSaturation_plot.pdf",
     priority: 1
     log:
         "logs/rseqc/rseqc_junction_saturation/{sample}-{unit}.log",
+    resources: time_min=120, mem_mb=8000, cpus=1
     params:
         extra=r"-q 255",
         prefix=lambda w, output: strip_suffix(
@@ -68,12 +70,13 @@ rule rseqc_junction_saturation:
 
 rule rseqc_stat:
     input:
-        "mapped/{sample}.{unit}.bam",
+        "mapped/{sample}.{unit}.sorted.bam",
     output:
         "qc/rseqc/{sample}-{unit}.stats.txt",
     priority: 1
     log:
         "logs/rseqc/rseqc_stat/{sample}-{unit}.log",
+    resources: time_min=120, mem_mb=8000, cpus=1
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -82,13 +85,14 @@ rule rseqc_stat:
 
 rule rseqc_infer:
     input:
-        bam="mapped/{sample}.{unit}.bam",
+        bam="mapped/{sample}.{unit}.sorted.bam",
         bed="qc/rseqc/annotation.bed",
     output:
         "qc/rseqc/{sample}-{unit}.infer_experiment.txt",
     priority: 1
     log:
         "logs/rseqc/rseqc_infer/{sample}-{unit}.log",
+    resources: time_min=120, mem_mb=8000, cpus=1
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -97,7 +101,7 @@ rule rseqc_infer:
 
 rule rseqc_innerdis:
     input:
-        bam="mapped/{sample}.{unit}.bam",
+        bam="mapped/{sample}.{unit}.sorted.bam",
         bed="qc/rseqc/annotation.bed",
     output:
         "qc/rseqc/{sample}-{unit}.inner_distance_freq.inner_distance.txt",
@@ -106,6 +110,7 @@ rule rseqc_innerdis:
         "logs/rseqc/rseqc_innerdis/{sample}-{unit}.log",
     params:
         prefix=lambda w, output: strip_suffix(output[0], ".inner_distance.txt"),
+    resources: time_min=120, mem_mb=8000, cpus=1
     conda:
         "../envs/rseqc.yaml"
     shell:
@@ -114,8 +119,9 @@ rule rseqc_innerdis:
 
 rule rseqc_readdis:
     input:
-        bam="mapped/{sample}.{unit}.bam",
+        bam="mapped/{sample}.{unit}.sorted.bam",
         bed="qc/rseqc/annotation.bed",
+        bai="mapped/{sample}.{unit}.sorted.bam.bai",
     output:
         "qc/rseqc/{sample}-{unit}.readdistribution.txt",
     priority: 1
@@ -123,13 +129,15 @@ rule rseqc_readdis:
         "logs/rseqc/rseqc_readdis/{sample}-{unit}.log",
     conda:
         "../envs/rseqc.yaml"
+    resources: time_min=120, mem_mb=8000, cpus=1
     shell:
         "read_distribution.py -r {input.bed} -i {input.bam} > {output} 2> {log}"
 
 
 rule rseqc_readdup:
     input:
-        "mapped/{sample}.{unit}.bam",
+        bam="mapped/{sample}.{unit}.sorted.bam",
+        bai="mapped/{sample}.{unit}.sorted.bam.bai"
     output:
         "qc/rseqc/{sample}-{unit}.readdup.DupRate_plot.pdf",
     priority: 1
@@ -137,15 +145,17 @@ rule rseqc_readdup:
         "logs/rseqc/rseqc_readdup/{sample}-{unit}.log",
     params:
         prefix=lambda w, output: strip_suffix(output[0], ".DupRate_plot.pdf"),
+    resources: time_min=120, mem_mb=16000, cpus=1
     conda:
         "../envs/rseqc.yaml"
     shell:
-        "read_duplication.py -i {input} -o {params.prefix} > {log} 2>&1"
+        "read_duplication.py -i {input.bam} -o {params.prefix} > {log} 2>&1"
 
 
 rule rseqc_readgc:
     input:
-        "mapped/{sample}.{unit}.bam"
+        bam="mapped/{sample}.{unit}.sorted.bam",
+        bai="mapped/{sample}.{unit}.sorted.bam.bai"
     output:
         "qc/rseqc/{sample}-{unit}.readgc.GC_plot.pdf",
     priority: 1
@@ -153,10 +163,11 @@ rule rseqc_readgc:
         "logs/rseqc/rseqc_readgc/{sample}-{unit}.log",
     params:
         prefix=lambda w, output: strip_suffix(output[0], ".GC_plot.pdf"),
+    resources: time_min=120, mem_mb=8000, cpus=1
     conda:
         "../envs/rseqc.yaml"
     shell:
-        "read_GC.py -i {input} -o {params.prefix} > {log} 2>&1"
+        "read_GC.py -i {input.bam} -o {params.prefix} > {log} 2>&1"
 
 rule fastqc_pretrim_r1:
     input:
@@ -236,7 +247,7 @@ rule multiqc_post:
 
 rule multiqc:
     input:
-        expand("mapped/{unit.sample}.{unit.unit}.bam", unit=units.itertuples()),
+        expand("mapped/{unit.sample}.{unit.unit}.sorted.bam", unit=units.itertuples()),
         expand("logs/hisat2/{unit.sample}_{unit.unit}.log", unit=units.itertuples()),
         expand("results/featureCounts/all.featureCounts.summary", unit=units.itertuples()),
         #expand("qc/rseqc/{unit.sample}-{unit.unit}.junctionanno.junction.bed", unit=units.itertuples()),

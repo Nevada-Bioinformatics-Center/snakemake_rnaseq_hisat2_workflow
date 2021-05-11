@@ -63,7 +63,7 @@ rule hisat2_index:
     output:
         directory("index_genome")
     params:
-        prefix = "index_genome/"
+        prefix = "index_genome/genome"
     log:
         "logs/hisat2_index_genome.log"
     threads: 16
@@ -71,26 +71,57 @@ rule hisat2_index:
     conda:
         "../envs/hisat2.yaml"
     shell:
-        "hisat2-build -p {threads} {input.fasta} --ss {input.ss} --exon {input.exons} 2> {log}"
+        "mkdir {params.prefix} && hisat2-build -p {threads} --ss {input.ss} --exon {input.exons} {input.fasta} {params.prefix} 2> {log}"
 
 
 rule hisat2_align:
     input:
-      #reads=get_fq
-      r1=get_trim_fastq1
-      r2=get_trim_fastq2
+        #reads=get_fq
+        r1=get_trim_fastq1,
+        r2=get_trim_fastq2,
+        idx="index_genome/"
     output:
-      "mapped/{sample}.{unit}.bam"
+        "mapped/{sample}.{unit}.bam"
     log:
-      "logs/hisat2/{sample}_{unit}.log"
+        "logs/hisat2/{sample}_{unit}.log"
     params:
       ## --new summary to allow multiqc parsing and 
       ## --dta to use XS BAM alignment information for stringtie downstream
-      extra="--new-summary --dta",
-      idx="index_genome/",
+        extra="--new-summary --dta",
+        idx="index_genome/genome",
     threads: 16
+    wildcard_constraints:
+        unit="rep\d+"
     resources: time_min=820, mem_mb=40000, cpus=16
     conda:
         "../envs/hisat2.yaml"
     shell:
         "(hisat2 --threads {threads} -x {params.idx} {params.extra} -1 {input.r1} -2 {input.r2} | samtools view -Sbh -o {output}) 2> {log}"
+
+rule samtools_index:
+    input:
+        "mapped/{sample}.{unit}.sorted.bam"
+    output:
+        "mapped/{sample}.{unit}.sorted.bam.bai"
+    params:
+        "" # optional params string
+    wrapper:
+        "0.73.0/bio/samtools/index"
+
+rule sambamba_sort:
+    input:
+        "mapped/{sample}.{unit}.bam"
+    output:
+        "mapped/{sample}.{unit}.sorted.bam"
+    log:
+        "logs/sambamba-sort/{sample}.{unit}.log"
+    params:
+        #"-m 20G" # optional additional parameters as string
+        "" # optional additional parameters as string
+    threads: 16 
+    wildcard_constraints:
+        unit="rep\d+"
+    resources: time_min=1320, mem_mb=20000, cpus=16
+    wrapper:
+        "0.74.0/bio/sambamba/sort"
+

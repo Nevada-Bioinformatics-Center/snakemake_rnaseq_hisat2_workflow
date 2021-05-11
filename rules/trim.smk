@@ -27,10 +27,6 @@ rule trimmomatic_pe:
         compression_level="-9"
     threads:
         4
-    # optional specification of memory usage of the JVM that snakemake will respect with global
-    # resource restrictions (https://snakemake.readthedocs.io/en/latest/snakefiles/rules.html#resources)
-    # and which can be used to request RAM during cluster job submission as `{resources.mem_mb}`:
-    # https://snakemake.readthedocs.io/en/latest/executing/cluster.html#job-properties
     resources:
         mem_mb=5024
     wrapper:

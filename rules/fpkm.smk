@@ -5,7 +5,7 @@ def get_bams(wildcards):
 
 rule featurecounts_onefile:
     input:
-        sam=expand("mapped/{unit.sample}.{unit.unit}.bam", unit=units.itertuples()),
+        sam=expand("mapped/{unit.sample}.{unit.unit}.sorted.bam", unit=units.itertuples()),
         annotation=config["ref"]["annotation"],
         fasta=config["ref"]["genomefa"]     # implicitly sets the -G flag
     output:
@@ -20,12 +20,13 @@ rule featurecounts_onefile:
         r_path="",    # implicitly sets the --Rpath flag
         extra="{}".format(config["params"]["featurecounts"])
     threads: 8
+    resources: time_min=220, mem_mb=20000, cpus=8
     wrapper:
-        "0.69.0/bio/subread/featurecounts"
+        "0.74.0/bio/subread/featurecounts"
 
 rule featurecounts_onefile_multimap:
     input:
-        sam=expand("mapped/{unit.sample}.{unit.unit}.bam", unit=units.itertuples()),
+        sam=expand("mapped/{unit.sample}.{unit.unit}.sorted.bam", unit=units.itertuples()),
         annotation=config["ref"]["annotation"],
         fasta=config["ref"]["genomefa"]     # implicitly sets the -G flag
     output:
@@ -39,13 +40,14 @@ rule featurecounts_onefile_multimap:
         tmp_dir="",   # implicitly sets the --tmpDir flag
         r_path="",    # implicitly sets the --Rpath flag
         extra="{}".format(config["params"]["featurecountsmulti"])
+    resources: time_min=220, mem_mb=20000, cpus=8
     threads: 8
     wrapper:
-        "0.69.0/bio/subread/featurecounts"
+        "0.74.0/bio/subread/featurecounts"
 
 rule featurecounts_onefile_multimap_frac:
     input:
-        sam=expand("mapped/{unit.sample}.{unit.unit}.bam", unit=units.itertuples()),
+        sam=expand("mapped/{unit.sample}.{unit.unit}.sorted.bam", unit=units.itertuples()),
         annotation=config["ref"]["annotation"],
         fasta=config["ref"]["genomefa"]     # implicitly sets the -G flag
     output:
@@ -59,9 +61,10 @@ rule featurecounts_onefile_multimap_frac:
         tmp_dir="",   # implicitly sets the --tmpDir flag
         r_path="",    # implicitly sets the --Rpath flag
         extra="{}".format(config["params"]["featurecountsmulti"])
+    resources: time_min=220, mem_mb=20000, cpus=8
     threads: 8
     wrapper:
-        "0.69.0/bio/subread/featurecounts"
+        "0.74.0/bio/subread/featurecounts"
 
 #rule insert_size:
 #    input:
