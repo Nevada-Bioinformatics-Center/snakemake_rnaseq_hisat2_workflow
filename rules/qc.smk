@@ -14,7 +14,7 @@ def get_fastq2(wildcards):
 
 rule rseqc_gtf2bed:
     input:
-        config["ref"]["annotationrseqc"],
+        config["ref"]["annotation"],
     output:
         bed="qc/rseqc/annotation.bed",
         db=temp("qc/rseqc/annotation.db"),

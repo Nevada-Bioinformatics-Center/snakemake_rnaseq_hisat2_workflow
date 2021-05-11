@@ -1,12 +1,23 @@
+# path or URL to sequencing unit sheet (TSV format, columns: sample, unit, fq1, fq2, 
+# strandedness). Units are technical replicates (e.g. lanes, or resequencing of the 
+# same biological sample).If the column "strandedness" is present (which is optional), 
+# can be empty or has one of these values: none, yes or reverse. none is for unstranded 
+# protocols, yes an reverse follow the nomenclature used in `htseq-count --reverse` 
+# which is referenced in STAR manual section 7, "Counting number of reads per gene".
+
 units: units.tsv
 
 ref:
-  genomefa: "/data/gpfs/assoc/inbre/hansvg/common_references/Astyanax_mexicanus/Astyanax_mexicanus.Astyanax_mexicanus-2.0.dna.toplevel.fa"
+  # the star index location or genomefa to index
+  genomefa: "/data/gpfs/assoc/inbre/hansvg/common_references/dmel_r6.38/dmel-all-chromosome-r6.38.fasta"
   # gtf file with transcripts
-  annotation: "/data/gpfs/assoc/inbre/hansvg/common_references/Astyanax_mexicanus/Astyanax_mexicanus.Astyanax_mexicanus-2.0.103.gtf"
-  annotationrseqc: "/data/gpfs/assoc/inbre/hansvg/common_references/Astyanax_mexicanus/Astyanax_mexicanus.Astyanax_mexicanus-2.0.103.gtf"
-  adapter: "/data/projects/common_references/raw/CustomBlacklist.fa"
+  annotation: "/data/gpfs/assoc/inbre/hansvg/common_references/dmel_r6.38/dmel-all-r6.38.gtf"
+  adapter: "/data/gpfs/assoc/inbre/hansvg/common_references/CustomBlacklist.fa"
 
 params:
+  ## --new summary to allow multiqc parsing and 
+  ## --dta to use XS BAM alignment information for stringtie downstream
+  #hisat2: "--new-summary --dta" #use for downstream stringtie analysis; more stringent mapping
+  hisat2: "--new-summary"
   featurecounts: "-p -C -t exon -g gene_id --extraAttributes gene_symbol,transcript_id,transcript_symbol"
   featurecountsmulti: "-p -M -t exon -g gene_id --extraAttributes gene_symbol,transcript_id,transcript_symbol"

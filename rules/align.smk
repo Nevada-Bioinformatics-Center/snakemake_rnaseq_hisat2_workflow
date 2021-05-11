@@ -87,7 +87,8 @@ rule hisat2_align:
     params:
       ## --new summary to allow multiqc parsing and 
       ## --dta to use XS BAM alignment information for stringtie downstream
-        extra="--new-summary --dta",
+        #extra="--new-summary --dta",
+        extra="{}".format(config["params"]["hisat2"]),
         idx="index_genome/genome",
     threads: 16
     wildcard_constraints:
@@ -105,6 +106,7 @@ rule samtools_index:
         "mapped/{sample}.{unit}.sorted.bam.bai"
     params:
         "" # optional params string
+    resources: time_min=320, mem_mb=2000, cpus=1
     wrapper:
         "0.73.0/bio/samtools/index"
 
